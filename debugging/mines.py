@@ -12,12 +12,14 @@ class Minesweeper:
         self.mines = set(random.sample(range(width * height), mines))
         self.field = [[' ' for _ in range(width)] for _ in range(height)]
         self.revealed = [[False for _ in range(width)] for _ in range(height)]
+        self.total_cells = width * height
+        self.revealed_cells = 0  # Track the number of non-mine cells revealed
 
     def print_board(self, reveal=False):
         clear_screen()
         print('  ' + ' '.join(str(i) for i in range(self.width)))
         for y in range(self.height):
-            print(str(y) + ' ', end='')
+            print(y, end=' ')
             for x in range(self.width):
                 if reveal or self.revealed[y][x]:
                     if (y * self.width + x) in self.mines:
@@ -42,7 +44,9 @@ class Minesweeper:
     def reveal(self, x, y):
         if (y * self.width + x) in self.mines:
             return False
-        self.revealed[y][x] = True
+        if not self.revealed[y][x]:  # Avoid counting the same cell twice
+            self.revealed[y][x] = True
+            self.revealed_cells += 1  # Increment revealed non-mine cells count
         if self.count_mines_nearby(x, y) == 0:
             for dx in [-1, 0, 1]:
                 for dy in [-1, 0, 1]:
@@ -51,12 +55,12 @@ class Minesweeper:
                         self.reveal(nx, ny)
         return True
 
-    def all_safe_cells_revealed(self):
-        for y in range(self.height):
-            for x in range(self.width):
-                if (y * self.width + x) not in self.mines and not self.revealed[y][x]:
-                    return False
-        return True
+    def check_win(self):
+        # Check if the number of revealed non-mine cells is equal to total non-mine cells
+        total_non_mine_cells = self.width * self.height - len(self.mines)
+        if self.revealed_cells == total_non_mine_cells:
+            return True
+        return False
 
     def play(self):
         while True:
@@ -68,7 +72,7 @@ class Minesweeper:
                     self.print_board(reveal=True)
                     print("Game Over! You hit a mine.")
                     break
-                if self.all_safe_cells_revealed():
+                if self.check_win():
                     self.print_board(reveal=True)
                     print("Congratulations! You've won the game.")
                     break
