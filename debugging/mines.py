@@ -63,4 +63,29 @@ class Minesweeper:
         while True:
             self.print_board()
             try:
-       
+                # Get user input for row and column
+                x = int(input("Enter x coordinate (0 to {}): ".format(self.width - 1)))
+                y = int(input("Enter y coordinate (0 to {}): ".format(self.height - 1)))
+                
+                # Validate coordinates
+                if x < 0 or x >= self.width or y < 0 or y >= self.height:
+                    print("Invalid coordinates! Please enter values within the board's size.")
+                    continue
+
+                # Try to reveal the cell
+                if not self.reveal(x, y):
+                    self.print_board(reveal=True)
+                    print("Game Over! You hit a mine.")
+                    break
+
+                # Check if the player has won
+                if self.check_win():
+                    self.print_board(reveal=True)
+                    print("Congratulations! You've won the game.")
+                    break
+            except ValueError:
+                print("Invalid input. Please enter numbers only.")
+
+if __name__ == "__main__":
+    game = Minesweeper()
+    game.play()
